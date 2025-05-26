@@ -1,7 +1,8 @@
 import * as db  from "./db.mjs";
 
 export const allTodos = (_req, res) => {
-  const allTodos = db.getAllTodos.all();
+  const userId = req.user.id;
+  const allTodos = db.getAllTodos.all({ $user_id: userId });
 
   return res.status(200).json(
     allTodos.map((todo) => ({
@@ -20,8 +21,9 @@ export const createTodo = (req, res) => {
   }
 
   const newId = crypto.randomUUID();
+  const userId = req.user.id;
 
-  const newTodo = db.insertTodo.get({ $id: newId, $text: text });
+  const newTodo = db.insertTodo.get({ $id: newId, $text: text, $user_id: userId });
 
   return res.status(200).json({
     id: newTodo.id,
@@ -32,8 +34,9 @@ export const createTodo = (req, res) => {
 
 export const updateTodo = (req, res) => {
   const id = req.params.id;
+  const userId = req.user.id;
 
-  const todo = db.getTodo.get({ $id: id });
+  const todo = db.getTodo.get({ $id: id, $user_id: userId });
 
   if (!todo) {
     return res.status(404).json({ error: "Todo not found" });
@@ -57,6 +60,7 @@ export const updateTodo = (req, res) => {
     $id: id,
     $text: newText,
     $done: newDone,
+    $user_id: userId,
   });
 
   return res.status(200).json({
